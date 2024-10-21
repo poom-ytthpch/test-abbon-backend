@@ -1,0 +1,53 @@
+scalar Date
+
+type Expense {
+  title: String
+  amount: Float
+  date: Date
+  category: String
+  notes: String
+  user: User
+  userId: String
+}
+
+type Category {
+  id: String
+  name: String
+}
+
+input CreateExpenseInput {
+  title: String!
+  amount: Float!
+  categoryId: String!
+  notes: String
+  userId: String!
+}
+
+input UpdateExpenseInput {
+  id: String!
+  amount: Float!
+  categoryId: String!
+  notes: String
+}
+
+input CreateCategoriesInput {
+  names: [String]
+}
+
+input CategoriesInput {
+  take: Int!
+  skip: Int!
+}
+
+type Query {
+  categories(input: CategoriesInput): [Category]
+  expenses: [Expense]!
+  expense(id: Int!): Expense
+}
+
+type Mutation {
+  createCategories(input: CreateCategoriesInput!): [Category]!
+  createExpense(createExpenseInput: CreateExpenseInput!): Expense!
+  updateExpense(updateExpenseInput: UpdateExpenseInput!): Expense!
+  removeExpense(id: ID!): Expense
+}
