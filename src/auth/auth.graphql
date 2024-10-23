@@ -1,10 +1,12 @@
 type User {
   id: String
   email: String
+  userName: String
 }
 
 input RegisterInput {
   email: String
+  userName: String
   password: String
   confirmPassword: String
 }

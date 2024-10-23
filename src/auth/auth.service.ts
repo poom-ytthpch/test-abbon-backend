@@ -1,9 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcrypt';
-import { LoginInput, LoginResponse, RegisterInput, User } from 'src/types/gql';
-import { PrismaService } from 'src/common/prisma/prisma.service';
-import { ConfigService } from 'src/common/config';
+import * as bcrypt from 'bcryptjs';
+import { LoginInput, LoginResponse, RegisterInput, User } from '../types/gql';
+import { PrismaService } from '../common/prisma/prisma.service';
+import { ConfigService } from '../common/config';
+import to from 'await-to-js';
+
 const config = ConfigService.load();
 
 @Injectable()
@@ -11,7 +18,7 @@ export class AuthService {
   constructor(private readonly repos: PrismaService) {}
 
   async register(input: RegisterInput) {
-    const { email, password, confirmPassword } = input;
+    const { email, userName, password, confirmPassword } = input;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -37,20 +44,25 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const result = (await this.repos.user.create({
-      data: {
-        password: hashedPassword,
-        email,
-      },
-    })) as User;
+    const [err, result] = await to(
+      this.repos.user.create({
+        data: {
+          password: hashedPassword,
+          email,
+          userName,
+        },
+      }),
+    );
+
+    if (err) {
+      throw new InternalServerErrorException(err.message);
+    }
 
     return result;
   }
 
   async login(input: LoginInput) {
     const { email, password } = input;
-
-    console.log({ email, password });
 
     const userExist = await this.repos.user.findUnique({
       where: {
@@ -95,5 +107,45 @@ export class AuthService {
     );
 
     return { token, refreshToken, status: true } as LoginResponse;
+  }
+
+  async refreshToken(accessToken: string): Promise<LoginResponse> {
+    try {
+      const decoded = jwt.verify(accessToken, config.test_crud.secret);
+      const token = await jwt.sign(
+        {
+          userInfo: {
+            email: decoded.userInfo.email,
+            userName: decoded.userInfo.userName,
+            status: decoded.userInfo.status,
+            roles: decoded.userInfo.roles,
+            userId: decoded.userInfo.userId,
+          },
+        },
+        config.test_crud.secret,
+        {
+          expiresIn: '15m',
+        },
+      );
+
+      const refreshToken = await jwt.sign(
+        {
+          userInfo: {
+            email: decoded.userInfo.email,
+            userName: decoded.userInfo.userName,
+            status: decoded.userInfo.status,
+            roles: decoded.userInfo.roles,
+            userId: decoded.userInfo.userId,
+          },
+        },
+        config.test_crud.secret,
+        {
+          expiresIn: '1h',
+        },
+      );
+      return { token, refreshToken, status: true } as LoginResponse;
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
   }
 }

@@ -1,10 +1,12 @@
 scalar Date
 
 type Expense {
+  id: String
   title: String
   amount: Float
   date: Date
-  category: String
+  categoryId: String
+  category: Category
   notes: String
   user: User
   userId: String
@@ -13,6 +15,13 @@ type Expense {
 type Category {
   id: String
   name: String
+}
+
+type ExpensesReportResponse {
+  amount: Float!
+  category: String!
+  userName: String!
+  date: Date!
 }
 
 input CreateExpenseInput {
@@ -25,6 +34,7 @@ input CreateExpenseInput {
 
 input UpdateExpenseInput {
   id: String!
+  title: String!
   amount: Float!
   categoryId: String!
   notes: String
@@ -38,16 +48,32 @@ input CategoriesInput {
   take: Int!
   skip: Int!
 }
+input ExpensesInput {
+  userId: String!
+  startDate: Date!
+  endDate: Date!
+  take: Int!
+  skip: Int!
+}
+
+input ExpensesReportInput {
+  userId: String!
+  startDate: Date!
+  endDate: Date!
+  take: Int!
+  skip: Int!
+}
 
 type Query {
   categories(input: CategoriesInput): [Category]
-  expenses: [Expense]!
+  expenses(input: ExpensesInput!): [Expense]!
   expense(id: Int!): Expense
+  expensesReport(input: ExpensesReportInput!): [ExpensesReportResponse]!
 }
 
 type Mutation {
   createCategories(input: CreateCategoriesInput!): [Category]!
-  createExpense(createExpenseInput: CreateExpenseInput!): Expense!
-  updateExpense(updateExpenseInput: UpdateExpenseInput!): Expense!
+  createExpense(input: CreateExpenseInput!): Expense!
+  updateExpense(input: UpdateExpenseInput!): Expense!
   removeExpense(id: ID!): Expense
 }

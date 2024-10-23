@@ -1,0 +1,35 @@
+version: '3.1'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb-compose
+    environment:
+      MYSQL_ROOT_PASSWORD: myStrongPassword
+      MYSQL_DATABASE: test_crud
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    restart: always
+    ports:
+      - 3307:3306
+    networks:
+      - mariadb_network
+
+  nestjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: nestjs-app
+    ports:
+      - 3011:3000
+    depends_on:
+      - mariadb
+    networks:
+      - mariadb_network
+
+    volumes:
+      - ./config.yaml:/app/config.yaml
+
+networks:
+  mariadb_network:
+    driver: bridge

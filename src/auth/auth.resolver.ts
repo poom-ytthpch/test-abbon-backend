@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { LoginInput, LoginResponse, RegisterInput, User } from 'src/types/gql';
+import { LoginInput, LoginResponse, RegisterInput, User } from '../types/gql';
 
 @Resolver('Auth')
 export class AuthResolver {
@@ -14,5 +14,10 @@ export class AuthResolver {
   @Mutation(() => LoginResponse)
   login(@Args('input') input: LoginInput) {
     return this.authService.login(input);
+  }
+
+  @Mutation()
+  refreshToken(@Args('accessToken') accessToken: string) {
+    return this.authService.refreshToken(accessToken);
   }
 }

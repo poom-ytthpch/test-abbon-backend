@@ -10,6 +10,7 @@
 
 export class RegisterInput {
     email?: Nullable<string>;
+    userName?: Nullable<string>;
     password?: Nullable<string>;
     confirmPassword?: Nullable<string>;
 }
@@ -29,6 +30,7 @@ export class CreateExpenseInput {
 
 export class UpdateExpenseInput {
     id: string;
+    title: string;
     amount: number;
     categoryId: string;
     notes?: Nullable<string>;
@@ -43,9 +45,26 @@ export class CategoriesInput {
     skip: number;
 }
 
+export class ExpensesInput {
+    userId: string;
+    startDate: Date;
+    endDate: Date;
+    take: number;
+    skip: number;
+}
+
+export class ExpensesReportInput {
+    userId: string;
+    startDate: Date;
+    endDate: Date;
+    take: number;
+    skip: number;
+}
+
 export class User {
     id?: Nullable<string>;
     email?: Nullable<string>;
+    userName?: Nullable<string>;
 }
 
 export class LoginResponse {
@@ -59,9 +78,11 @@ export abstract class IQuery {
 
     abstract categories(input?: Nullable<CategoriesInput>): Nullable<Nullable<Category>[]> | Promise<Nullable<Nullable<Category>[]>>;
 
-    abstract expenses(): Nullable<Expense>[] | Promise<Nullable<Expense>[]>;
+    abstract expenses(input: ExpensesInput): Nullable<Expense>[] | Promise<Nullable<Expense>[]>;
 
     abstract expense(id: number): Nullable<Expense> | Promise<Nullable<Expense>>;
+
+    abstract expensesReport(input: ExpensesReportInput): Nullable<ExpensesReportResponse>[] | Promise<Nullable<ExpensesReportResponse>[]>;
 }
 
 export abstract class IMutation {
@@ -73,18 +94,20 @@ export abstract class IMutation {
 
     abstract createCategories(input: CreateCategoriesInput): Nullable<Category>[] | Promise<Nullable<Category>[]>;
 
-    abstract createExpense(createExpenseInput: CreateExpenseInput): Expense | Promise<Expense>;
+    abstract createExpense(input: CreateExpenseInput): Expense | Promise<Expense>;
 
-    abstract updateExpense(updateExpenseInput: UpdateExpenseInput): Expense | Promise<Expense>;
+    abstract updateExpense(input: UpdateExpenseInput): Expense | Promise<Expense>;
 
     abstract removeExpense(id: string): Nullable<Expense> | Promise<Nullable<Expense>>;
 }
 
 export class Expense {
+    id?: Nullable<string>;
     title?: Nullable<string>;
     amount?: Nullable<number>;
     date?: Nullable<Date>;
-    category?: Nullable<string>;
+    categoryId?: Nullable<string>;
+    category?: Nullable<Category>;
     notes?: Nullable<string>;
     user?: Nullable<User>;
     userId?: Nullable<string>;
@@ -93,6 +116,13 @@ export class Expense {
 export class Category {
     id?: Nullable<string>;
     name?: Nullable<string>;
+}
+
+export class ExpensesReportResponse {
+    amount: number;
+    category: string;
+    userName: string;
+    date: Date;
 }
 
 type Nullable<T> = T | null;

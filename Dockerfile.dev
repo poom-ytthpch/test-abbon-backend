@@ -1,0 +1,16 @@
+FROM node:18 AS builder
+
+WORKDIR /app
+
+RUN npm install -g pnpm@9.10.0
+
+COPY . .
+
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+
+RUN rm -rf node_modules && pnpm i --unsafe-perm
+RUN pnpm prisma:gen
+
+CMD [ "pnpm", "start" ]
+
+EXPOSE 3000
