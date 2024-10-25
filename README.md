@@ -28,8 +28,16 @@
 
 ## Project setup
 
+1. Set config file remove example and set config.yaml and .env
+
 ```bash
+
 $ pnpm install
+
+if frist time need to migrate db
+$ pnpm migrate:dev
+else
+$ pnpm prisma:gen
 ```
 
 ## Compile and run the project
