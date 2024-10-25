@@ -28,15 +28,19 @@
 
 ## Project setup
 
+### Potsman setup
+	import json file in repo postman
+
 1. Set config file remove example and set config.yaml and .env
 
 ```bash
 
 $ pnpm install
 
-if frist time need to migrate db
+# if frist time need to migrate db
 $ pnpm migrate:dev
-else
+
+# else
 $ pnpm prisma:gen
 ```
 
