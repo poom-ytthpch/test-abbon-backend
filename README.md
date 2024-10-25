@@ -48,26 +48,26 @@ $ pnpm prisma:gen
 
 ```bash
 # development
-$ pnpm run start
+$ pnpm start
 
 # watch mode
-$ pnpm run start:dev
+$ pnpm start:dev
 
 # production mode
-$ pnpm run start:prod
+$ pnpm start:prod
 ```
 
 ## Run tests
 
 ```bash
 # unit tests
-$ pnpm run test
+$ pnpm test
 
 # e2e tests
-$ pnpm run test:e2e
+$ pnpm test:e2e
 
 # test coverage
-$ pnpm run test:cov
+$ pnpm test:cov
 ```
 
 ## Deployment
