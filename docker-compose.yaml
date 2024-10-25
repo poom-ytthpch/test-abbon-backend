@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   mariadb:
-    image: mariadb:latest
+    image: mariadb:10.5.4
     container_name: mariadb-compose
     environment:
       MYSQL_ROOT_PASSWORD: myStrongPassword
@@ -14,6 +14,9 @@ services:
       - 3307:3306
     networks:
       - mariadb_network
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+
 
   nestjs-app:
     build:
@@ -21,7 +24,7 @@ services:
       dockerfile: Dockerfile.dev
     container_name: nestjs-app
     ports:
-      - 3011:3000
+      - 3010:3010
     depends_on:
       - mariadb
     networks:

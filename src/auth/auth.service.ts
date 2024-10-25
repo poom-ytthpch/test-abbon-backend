@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
@@ -10,14 +12,22 @@ import { LoginInput, LoginResponse, RegisterInput, User } from '../types/gql';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { ConfigService } from '../common/config';
 import to from 'await-to-js';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 const config = ConfigService.load();
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly repos: PrismaService) {}
+  constructor(
+    private readonly repos: PrismaService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   async register(input: RegisterInput) {
+    this.logger.debug(
+      `${AuthService.name}:${this.register.name} - input: ${JSON.stringify(input)}`,
+    );
+
     const { email, userName, password, confirmPassword } = input;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,6 +65,9 @@ export class AuthService {
     );
 
     if (err) {
+      this.logger.error(
+        `${AuthService.name}:${this.register.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
@@ -62,13 +75,26 @@ export class AuthService {
   }
 
   async login(input: LoginInput) {
+    this.logger.debug(
+      `${AuthService.name}:${this.login.name} - input: ${JSON.stringify(input)}`,
+    );
+
     const { email, password } = input;
 
-    const userExist = await this.repos.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const [err, userExist] = await to(
+      this.repos.user.findUnique({
+        where: {
+          email,
+        },
+      }),
+    );
+
+    if (err) {
+      this.logger.error(
+        `${AuthService.name}:${this.login.name} - error: ${JSON.stringify(err)}`,
+      );
+      throw new InternalServerErrorException(err.message);
+    }
 
     if (!userExist) {
       throw new BadRequestException('User not found');
@@ -110,6 +136,10 @@ export class AuthService {
   }
 
   async refreshToken(accessToken: string): Promise<LoginResponse> {
+    this.logger.debug(
+      `${AuthService.name}:${this.refreshToken.name} - accessToken: ${accessToken}`,
+    );
+
     try {
       const decoded = jwt.verify(accessToken, config.test_crud.secret);
       const token = await jwt.sign(
@@ -143,8 +173,12 @@ export class AuthService {
           expiresIn: '1h',
         },
       );
+
       return { token, refreshToken, status: true } as LoginResponse;
     } catch (error) {
+      this.logger.error(
+        `${AuthService.name}:${this.refreshToken.name} - error: ${JSON.stringify(error)}`,
+      );
       throw new UnauthorizedException();
     }
   }

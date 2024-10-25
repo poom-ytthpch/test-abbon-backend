@@ -26,6 +26,7 @@ export class CreateExpenseInput {
     categoryId: string;
     notes?: Nullable<string>;
     userId: string;
+    date: Date;
 }
 
 export class UpdateExpenseInput {
@@ -34,6 +35,7 @@ export class UpdateExpenseInput {
     amount: number;
     categoryId: string;
     notes?: Nullable<string>;
+    date: Date;
 }
 
 export class CreateCategoriesInput {

@@ -30,6 +30,7 @@ input CreateExpenseInput {
   categoryId: String!
   notes: String
   userId: String!
+  date: Date!
 }
 
 input UpdateExpenseInput {
@@ -38,6 +39,7 @@ input UpdateExpenseInput {
   amount: Float!
   categoryId: String!
   notes: String
+  date: Date!
 }
 
 input CreateCategoriesInput {

@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -17,11 +19,20 @@ import {
   UpdateExpenseInput,
 } from '../types/gql';
 import to from 'await-to-js';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+
 @Injectable()
 export class ExpenseService {
-  constructor(private readonly repos: PrismaService) {}
+  constructor(
+    private readonly repos: PrismaService,
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
 
   async createCategories(input: CreateCategoriesInput): Promise<Category[]> {
+    this.logger.debug(
+      `${ExpenseService.name}:${this.createCategories.name} - input: ${JSON.stringify(input)}`,
+    );
+
     const { names } = input;
     const [err, categories] = await to(
       this.repos.category.createMany({
@@ -30,6 +41,9 @@ export class ExpenseService {
     );
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.createCategories.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
@@ -37,7 +51,11 @@ export class ExpenseService {
   }
 
   async createExpense(input: CreateExpenseInput): Promise<Expense> {
-    const { title, amount, userId, notes, categoryId } = input;
+    this.logger.debug(
+      `${ExpenseService.name}:${this.createExpense.name} - input: ${JSON.stringify(input)}`,
+    );
+
+    const { title, amount, userId, notes, categoryId, date } = input;
 
     const [err, expense] = await to(
       this.repos.expense.create({
@@ -50,7 +68,7 @@ export class ExpenseService {
               id: categoryId,
             },
           },
-          date: new Date(),
+          date: new Date(date),
           user: {
             connect: {
               id: userId,
@@ -64,6 +82,9 @@ export class ExpenseService {
     );
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.createExpense.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
@@ -71,6 +92,10 @@ export class ExpenseService {
   }
 
   async categories(input: CategoriesInput): Promise<Category[]> {
+    this.logger.debug(
+      `${ExpenseService.name}:${this.categories.name} - input: ${JSON.stringify(input)}`,
+    );
+
     const { take, skip } = input;
 
     const [err, categories] = await to(
@@ -81,6 +106,9 @@ export class ExpenseService {
     );
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.categories.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
@@ -88,6 +116,10 @@ export class ExpenseService {
   }
 
   async expenses(input: ExpensesInput): Promise<Expense[]> {
+    this.logger.debug(
+      `${ExpenseService.name}:${this.expenses.name} - input: ${JSON.stringify(input)}`,
+    );
+
     const { userId, startDate, endDate, take, skip } = input;
 
     const [err, expenses] = await to(
@@ -114,6 +146,9 @@ export class ExpenseService {
     );
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.expenses.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
@@ -121,7 +156,11 @@ export class ExpenseService {
   }
 
   async updateExpense(input: UpdateExpenseInput): Promise<Expense> {
-    const { id, title, amount, notes, categoryId } = input;
+    this.logger.debug(
+      `${ExpenseService.name}:${this.updateExpense.name} - input: ${JSON.stringify(input)}`,
+    );
+
+    const { id, title, amount, notes, categoryId, date } = input;
 
     await this.expenseValidation(id);
 
@@ -134,6 +173,7 @@ export class ExpenseService {
           title,
           amount,
           notes: notes || undefined,
+          date: new Date(date),
           category: {
             connect: {
               id: categoryId,
@@ -144,6 +184,9 @@ export class ExpenseService {
     );
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.updateExpense.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
@@ -151,6 +194,10 @@ export class ExpenseService {
   }
 
   async removeExpense(id: string): Promise<Expense> {
+    this.logger.debug(
+      `${ExpenseService.name}:${this.removeExpense.name} - id: ${id}`,
+    );
+
     await this.expenseValidation(id);
 
     const [err, deleted] = await to(
@@ -162,6 +209,9 @@ export class ExpenseService {
     );
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.removeExpense.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
@@ -169,6 +219,10 @@ export class ExpenseService {
   }
 
   private async expenseValidation(id: string) {
+    this.logger.debug(
+      `${ExpenseService.name}:${this.expenseValidation.name} - id: ${id}`,
+    );
+
     const [err, expense] = await to(
       this.repos.expense.findUnique({
         where: {
@@ -178,10 +232,16 @@ export class ExpenseService {
     );
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.expenseValidation.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
     if (!expense) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.expenseValidation.name} - error: Expense not found`,
+      );
       throw new NotFoundException('Expense not found');
     }
 
@@ -191,25 +251,30 @@ export class ExpenseService {
   async expensesReport(
     input: ExpensesReportInput,
   ): Promise<ExpensesReportResponse[]> {
+    this.logger.debug(
+      `${ExpenseService.name}:${this.expensesReport.name} - input: ${JSON.stringify(input)}`,
+    );
+
     const { userId, startDate, endDate } = input;
 
     const [err, expenses] = await to(this.repos.$queryRaw<
       { amount: number; category: string; userName: string; date: Date }[]
     >`
-    SELECT SUM(amount) AS amount , c.name AS category , u.email , e.date , u.userName
-
+    SELECT SUM(amount) AS amount, c.name AS category, u.email, e.date, u.userName
     FROM Expense AS e 
     JOIN Category AS c ON e.categoryId = c.id 
     JOIN User AS u ON e.userId = u.id 
-
     WHERE e.date >= ${startDate} 
     AND e.date <= ${endDate}
     AND e.userId = ${userId}
-    GROUP BY c.name , e.userId 
+    GROUP BY c.name, e.userId 
     ORDER BY u.email;
     `);
 
     if (err) {
+      this.logger.error(
+        `${ExpenseService.name}:${this.expensesReport.name} - error: ${JSON.stringify(err)}`,
+      );
       throw new InternalServerErrorException(err.message);
     }
 
