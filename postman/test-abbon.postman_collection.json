@@ -1,0 +1,287 @@
+{
+	"info": {
+		"_postman_id": "99267b16-96e1-49dc-a9d4-d8d5b3d520ce",
+		"name": "test-abbon",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29725659"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Register($input: RegisterInput!) {\n  register(input: $input) {\n    userName\n    email\n    id\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"confirmPassword\": \"Password01\",\n    \"email\": \"test01@gmail.com\",\n    \"password\": \"Password01\",\n    \"userName\": \"test01\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Set env\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"accessToken\", jsonData.data.login.token);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    status\n    token\n    refreshToken\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"email\": \"test01@gmail.com\",\n    \"password\": \"Password01\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "refreshToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation RefreshToken($accessToken: String!) {\n  refreshToken(accessToken: $accessToken) {\n    status\n    token\n    refreshToken\n  }\n}",
+								"variables": "{\n    \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mbyI6eyJpZCI6IjNhOWIwODQ5LTNhNTMtNDU0MC1iOThjLTZhNmJkOGM1N2VjYSIsImVtYWlsIjoidGVzdDAxQGdtYWlsLmNvbSJ9LCJpYXQiOjE3Mjk2MDM0NDAsImV4cCI6MTcyOTYxMDY0MH0.wlfae98S9Rg6z3HJcTUJbMtO2DNPQzfC95hfv5_2zIc\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "expense",
+			"item": [
+				{
+					"name": "createCategories",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateCategories($input: CreateCategoriesInput!) {\n  createCategories(input: $input) {\n    id\n    name\n  }\n}",
+								"variables": "{\n    \"input\": {\n        \"names\": [\n            \"Food & Drink\",\n            \"Shopping\",\n            \"Transport\",\n            \"Investments\"\n        ]\n    }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createExpense",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation CreateExpense($input: CreateExpenseInput!) {\n  createExpense(input: $input) {\n    id\n    title\n    amount\n    date\n    category {\n      name\n      id\n    }\n    notes\n    userId\n  }\n}",
+								"variables": "{\n    \"input\": {\n        \"amount\": 16500.00,\n        \"categoryId\": \"d074bb4d-14b4-406b-9cab-519b2d912c92\",\n        \"notes\": \"PS5\",\n        \"title\": \"Sony\",\n        \"userId\": \"3a9b0849-3a53-4540-b98c-6a6bd8c57eca\",\n        \"date\": \"2024-10-23T06:00:00.000Z\"\n    }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "categories",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Categories($input: CategoriesInput) {\n  categories(input: $input) {\n    id\n    name\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"skip\": 0,\n    \"take\": 100\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "expenses",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Expenses($input: ExpensesInput!) {\n  expenses(input: $input) {\n    title\n    amount\n    date\n    category {\n      name\n    }\n    notes\n    userId\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"endDate\": \"2024-10-30T00:00:00.000Z\",\n    \"skip\": 0,\n    \"startDate\": \"2024-10-19T00:00:00.000Z\",\n    \"take\": 100,\n    \"userId\": \"3a9b0849-3a53-4540-b98c-6a6bd8c57eca\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateExpense",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation UpdateExpense($input: UpdateExpenseInput!) {\n  updateExpense(input: $input) {\n    title\n    amount\n    date\n    category {\n      name\n    }\n    notes\n    userId\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"amount\": 110.00,\n    \"categoryId\": \"d074bb4d-14b4-406b-9cab-519b2d912c92\",\n    \"id\": \"43f1612f-fd19-49b9-83c2-b54f18b8494a\",\n    \"notes\": null,\n    \"title\": \"New Shoes\",\n    \"date\": \"2024-10-25T06:00:00.000Z\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeExpense",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation RemoveExpense($id: ID!) {\n  removeExpense(id: $id) {\n    title\n    amount\n    date\n    category {\n      name\n    }\n    notes\n    userId\n  }\n}",
+								"variables": "{\n  \"id\": \"590f3bbb-31c9-4e48-84c6-39a82a841326\"\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "expensesReport",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query ExpensesReport($input: ExpensesReportInput!) {\n  expensesReport(input: $input) {\n    amount\n    category\n    userName\n    date\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"skip\": 0,\n    \"take\": 100,\n    \"startDate\": \"2024-01-03T00:00:00.000Z\",\n    \"endDate\": \"2024-01-04T00:00:00.000Z\",\n    \"userId\": \"1ba71c8e-928e-4d3f-9079-8ef783ad57a5\"\n  }\n}"
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
