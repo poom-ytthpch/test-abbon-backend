@@ -11,6 +11,7 @@ import {
   CategoriesInput,
   Category,
   CreateCategoriesInput,
+  CreateCategoriesResponse,
   CreateExpenseInput,
   Expense,
   ExpensesInput,
@@ -28,7 +29,7 @@ export class ExpenseService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
-  async createCategories(input: CreateCategoriesInput): Promise<Category[]> {
+  async createCategories(input: CreateCategoriesInput): Promise<CreateCategoriesResponse> {
     this.logger.debug(
       `${ExpenseService.name}:${this.createCategories.name} - input: ${JSON.stringify(input)}`,
     );
@@ -47,7 +48,7 @@ export class ExpenseService {
       throw new InternalServerErrorException(err.message);
     }
 
-    return categories as unknown as Category[];
+    return categories as CreateCategoriesResponse;
   }
 
   async createExpense(input: CreateExpenseInput): Promise<Expense> {
@@ -172,7 +173,7 @@ export class ExpenseService {
         data: {
           title,
           amount,
-          notes: notes || undefined,
+          notes: notes ?? null,
           date: new Date(date),
           category: {
             connect: {

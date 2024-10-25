@@ -106,7 +106,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "mutation CreateCategories($input: CreateCategoriesInput!) {\n  createCategories(input: $input) {\n    id\n    name\n  }\n}",
+								"query": "mutation CreateCategories($input: CreateCategoriesInput!) {\n  createCategories(input: $input) {\n    count\n  }\n}",
 								"variables": "{\n    \"input\": {\n        \"names\": [\n            \"Food & Drink\",\n            \"Shopping\",\n            \"Transport\",\n            \"Investments\"\n        ]\n    }\n}"
 							}
 						},

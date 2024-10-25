@@ -24,6 +24,10 @@ type ExpensesReportResponse {
   date: Date!
 }
 
+type CreateCategoriesResponse {
+  count: Int
+}
+
 input CreateExpenseInput {
   title: String!
   amount: Float!
@@ -74,7 +78,7 @@ type Query {
 }
 
 type Mutation {
-  createCategories(input: CreateCategoriesInput!): [Category]!
+  createCategories(input: CreateCategoriesInput!): CreateCategoriesResponse!
   createExpense(input: CreateExpenseInput!): Expense!
   updateExpense(input: UpdateExpenseInput!): Expense!
   removeExpense(id: ID!): Expense

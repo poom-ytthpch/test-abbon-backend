@@ -6,6 +6,7 @@ import {
   CategoriesInput,
   Category,
   CreateCategoriesInput,
+  CreateCategoriesResponse,
   CreateExpenseInput,
   Expense,
   ExpensesInput,
@@ -20,7 +21,7 @@ export class ExpenseResolver {
   constructor(private readonly expenseService: ExpenseService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Mutation(() => [Category])
+  @Mutation(() => CreateCategoriesResponse)
   async createCategories(@Args('input') input: CreateCategoriesInput) {
     return this.expenseService.createCategories(input);
   }

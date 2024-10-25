@@ -94,7 +94,7 @@ export abstract class IMutation {
 
     abstract refreshToken(accessToken: string): LoginResponse | Promise<LoginResponse>;
 
-    abstract createCategories(input: CreateCategoriesInput): Nullable<Category>[] | Promise<Nullable<Category>[]>;
+    abstract createCategories(input: CreateCategoriesInput): CreateCategoriesResponse | Promise<CreateCategoriesResponse>;
 
     abstract createExpense(input: CreateExpenseInput): Expense | Promise<Expense>;
 
@@ -125,6 +125,10 @@ export class ExpensesReportResponse {
     category: string;
     userName: string;
     date: Date;
+}
+
+export class CreateCategoriesResponse {
+    count?: Nullable<number>;
 }
 
 type Nullable<T> = T | null;
